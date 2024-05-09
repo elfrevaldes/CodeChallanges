@@ -11,8 +11,10 @@ public class Solution
 
     public int GetNthFibonacci(int n)
     { // O(2n)
-        if (n <= 0)
+        if (n < 0)
             throw new ArgumentException("Input must be a positive integer.", nameof(n));
+        if (n == 0) 
+            return 0;
 
         else if (n == 1 || n == 2)
             return 1;
