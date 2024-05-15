@@ -271,6 +271,38 @@ class Result
         while (!upRComplete || !downRComplete || !horiRComplete || !vertUComplete || 
             !vertDComplete || !upLComplete || !downLComplete || !horiLComplete)
         {
+            if (rUp > ROW_COL)
+            {
+                upLComplete = true;
+                vertUComplete = true;
+                upRComplete = true;
+            }
+
+            if (cUp > ROW_COL)
+            {
+                upRComplete = true;
+                horiRComplete = true;
+                downRComplete = true;
+            }
+
+            if (rDown < 1)
+            {
+                downRComplete = true;
+                vertDComplete = true;
+                downLComplete = true;
+            }
+
+            if (cDown < 1)
+            {
+                upLComplete = true;
+                horiLComplete = true;
+                downLComplete = true;
+            }
+
+            if (upRComplete && downRComplete && horiRComplete && vertUComplete &&
+            vertDComplete && upLComplete && downLComplete && horiLComplete)
+            { break; }
+
             foreach (var obstacle in obstacles)
             {
                 // diagonal left up 
@@ -365,34 +397,6 @@ class Result
             cUp++;
             rDown--;
             cDown--;
-
-            if (rUp > ROW_COL)
-            {
-                upLComplete = true; 
-                vertUComplete = true;
-                upRComplete = true;
-            }
-
-            if (cUp > ROW_COL)
-            {
-                upRComplete = true; 
-                horiRComplete = true;
-                downRComplete = true;
-            }
-
-            if (rDown < 1)
-            {
-                downRComplete = true;
-                vertDComplete = true;
-                downLComplete = true;
-            }
-
-            if (cDown < 1)
-            {
-                upLComplete = true; 
-                horiLComplete = true;
-                downLComplete = true;
-            }
         }
 
 
@@ -413,17 +417,21 @@ class Solution
 
         //string[] firstMultipleInput = Console.ReadLine().TrimEnd().Split(' ');
 
-        int n = 8;// Convert.ToInt32(firstMultipleInput[0]);
+        int n = 4;// Convert.ToInt32(firstMultipleInput[0]);
 
         int k = 3; // Convert.ToInt32(firstMultipleInput[1]);
 
         //string[] secondMultipleInput = Console.ReadLine().TrimEnd().Split(' ');
 
-        int r_q = n/2; //Convert.ToInt32(secondMultipleInput[0]);
+        int r_q = 4; //Convert.ToInt32(secondMultipleInput[0]);
 
-        int c_q = n/2; // Convert.ToInt32(secondMultipleInput[1]);
+        int c_q = 4; // Convert.ToInt32(secondMultipleInput[1]);
 
         List<List<int>> obstacles = new List<List<int>>();
+
+        //obstacles.Add(new List<int>() { 5, 5 });
+        //obstacles.Add(new List<int>() { 4, 2 });
+        //obstacles.Add(new List<int>() { 2, 3 });
 
         //// Testing obstacles right side
         //obstacles.Add(new List<int>() { 7, 7 });
@@ -436,12 +444,12 @@ class Solution
         //obstacles.Add(new List<int>() { 6, 2 });
 
         // Testing obstacles vertically
-        obstacles.Add(new List<int>() { r_q, ((n - c_q) / 2) });
-        obstacles.Add(new List<int>() { r_q, ((n - c_q) / 2) + c_q });
+        //obstacles.Add(new List<int>() { r_q, ((n - c_q) / 2) });
+        //obstacles.Add(new List<int>() { r_q, ((n - c_q) / 2) + c_q });
 
-        // Testing obstacles horizontally
-        obstacles.Add(new List<int>() { ((n - r_q) / 2),  c_q });
-        obstacles.Add(new List<int>() { ((n - r_q) / 2) + r_q, c_q });
+        //// Testing obstacles horizontally
+        //obstacles.Add(new List<int>() { ((n - r_q) / 2),  c_q });
+        //obstacles.Add(new List<int>() { ((n - r_q) / 2) + r_q, c_q });
 
         //for (int i = 0; i < k; i++)
         //{
