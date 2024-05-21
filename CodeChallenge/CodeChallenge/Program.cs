@@ -1,81 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 class Result
 {
 
     /*
-     * Complete the 'climbingLeaderboard' function below.
-     *
-     * The function is expected to return an INTEGER_ARRAY.
-     * The function accepts following parameters:
-     *  1. INTEGER_ARRAY ranked
-     *  2. INTEGER_ARRAY player
+     * Data type that can search in O(1) by value and index (it uses more space)
      */
     public class Mapping
     {
-        private List<int> indexesList;
+        private List<int> indexes;
+        //                 id   value
         private Dictionary<int, int> values; // Renamed to avoid confusion
-        public int Count { get => indexesList.Count private set; }
+       
+        public int Count { get => indexes.Count; }
 
-        public Mapping()
+        public bool CanHaveDuplicates { get; private set; }
+
+        public Mapping(bool canHaveDuplicates = false)
         {
             values = new Dictionary<int, int>();
-            indexesList = new List<int>();
+            indexes = new List<int>();
+            CanHaveDuplicates = canHaveDuplicates;
         }
 
-        // Example methods to manipulate the dictionaries could be added here
         public void Add(int key)
         {
-            if (!values.ContainsKey(key))
+            if (CanHaveDuplicates || !values.ContainsKey(key))
             {
-                values.Add(key, indexesList.Count + 1);
-                indexesList.Add(key);
+                int lastItem = indexes.Count;
+                values.Add(key, lastItem);
+                indexes.Add(key);
             }
         }
 
-        public int IndexOf(int index)
+        public int ValueByIndex(int index)
         {
-            if (index <= indexesList.Count)
+            if (index <= indexes.Count)
             {
-                return values[indexesList[index]];
+                return indexes[index];
             }
-            throw new KeyNotFoundException("The index or key was not found.");
+            else
+            {
+                throw new KeyNotFoundException("The index or key was not found.");
+            }
         }
 
-        public bool ContainsKey(int key)
+        public int IndexByValue(int value)
+        {
+            return values[value];
+        }
+
+        public bool Contains(int key)
         {
             return values.ContainsKey(key);
         }
 
-        public void DeleteByIndex(int index)
+        private void UpdateIndex(int index)
         {
-            if(index <= Count)
+            int lastItem = indexes.Count;
+            while (index < lastItem)
             {
-                int key = indexesList[index];
-                indexesList.RemoveAt(index);
+                int key = indexes[index];
+                values[key] = index++;
             }
-            throw new KeyNotFoundException("The index was not found.");
         }
 
-        public void DeleteByKey(int key)
+        public void DeleteByIndex(int index)
         {
-            if (values.ContainsKey(key))
+            if (index <= indexes.Count)
             {
-                indexesList.Remove(key);
+                int key = indexes[index];
+                indexes.RemoveAt(index);
                 values.Remove(key);
-                return;
+                UpdateIndex(index);
             }
-            throw new KeyNotFoundException("The index was not found.");
+            else
+            {
+                throw new KeyNotFoundException("The index was not found.");
+            }
+        }
+
+        public void DeleteByValue(int value)
+        {
+            if (values.ContainsKey(value))
+            {
+                indexes.Remove(value);
+                int index = values[value];
+                values.Remove(value);
+                UpdateIndex(index);
+            }
+            else
+            {
+                throw new KeyNotFoundException("The index was not found.");
+            }
         }
 
     }
 
-    private static int findPlace(Mapping scoreRanks, int score)
+    private static int FindRankByScore(Mapping scoreRanks, int score)
     {
         // I could use the IndexOf scoreRanks + 1 but I want to save the time
         // to search for it again
-        int index = 1;
         int left = 0;
         int right = scoreRanks.Count - 1;
 
@@ -83,12 +110,13 @@ class Result
         {
             // find the middle
             int middle = left + (right - left) / 2;
+            int middleValue = scoreRanks.ValueByIndex(middle); // Key is the score
 
-            if (scoreRanks.IndexOf(middle) == score)
+            if (middleValue == score)
             {
-                return middle + 1;
+                return middle + 1; // value is the rank
             }
-            else if (scoreRanks.IndexOf(middle) < score)
+            else if (middleValue < score)
             {
                 // to the right
                 right = middle - 1;
@@ -98,85 +126,50 @@ class Result
                 left = middle + 1;
             }
         }
+        // If Higher bound
+        if (right == -1 && left == 0)
+            return 1;
+        
         return left + 1;
-        //foreach (KeyValuePair<int, int> kvp in scoreRanks)
-        //{
-        //    if (score > kvp.Key)
-        //        return index;
-        //    index++;
-        //}
-        // return index;
     }
 
     public static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
     {
-        // process the ranks to give them their place
-        // List<int> scoreRanks = new List<int>();
-        Mapping scoreRanks = new Mapping();
+        Mapping scoreRanks = new();
         
         foreach (int score in ranked)
         {
             scoreRanks.Add(score);
         }
 
-        scoreRanks.DeleteByKey(70);
         List<int> results = new List<int>();
         // for each of the plays you want to check
         foreach (int plScore in player)
         {
-            if (scoreRanks.ContainsKey(plScore))
+            if (scoreRanks.Contains(plScore))
             {
-                results.Add(scoreRanks.IndexOf(plScore));
+                results.Add(scoreRanks.IndexByValue(plScore)+1);
             }
             else
             {
-                results.Add(Result.findPlace(scoreRanks, plScore));
+                results.Add(Result.FindRankByScore(scoreRanks, plScore));
             }
         }
-
-        // if the score is in the scoredList assign score
-        // if not loop through scores and find the spot
+        
         return results;
     }
-    //public static List<int> climbingLeaderboard(List<int> ranked, List<int> player)
-    //{
-    //    // process the ranks to give them their place
-    //    // List<int> scoreRanks = new List<int>();
-    //    Dictionary<int, int> scoreRanks = new Dictionary<int, int>();
-    //    int place = 1;
-    //    foreach (int score in ranked)
-    //    {
-    //        if (!scoreRanks.ContainsKey(score))
-    //            scoreRanks.Add(score, place++);
-    //    }
-
-    //    List<int> results = new List<int>();
-    //    // for each of the plays you want to check
-    //    foreach (int plScore in player)
-    //    {
-    //        if (scoreRanks.ContainsKey(plScore))
-    //        {
-    //            results.Add(scoreRanks[plScore]);
-    //        }
-    //        else
-    //        {
-    //            results.Add(Result.findPlace(scoreRanks, plScore));
-    //        }
-    //    }
-
-    //    // if the score is in the scoredList assign score
-    //    // if not loop through scores and find the spot
-    //    return results;
-    //}
 }
 
     public class Program
 {
     public static void Main()
     {
-        List<int> test = new() { 100, 100, 70, 50, 40, 40, 20, 10 };
+        List<int> test = new() { 100, 100, 50, 40, 40, 20, 10 };
 
-        List<int> player = new() { 5, 25, 50, 120 };
+        // 0,100 1,50 2,40 3,20 4,10
+        // 5,6 25,4 50,2 100,1 120,1
+
+        List<int> player = new() { 5, 25, 50, 100, 120 };
 
         List<int> results = Result.climbingLeaderboard(test, player);
 
